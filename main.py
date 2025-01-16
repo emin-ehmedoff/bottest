@@ -1,27 +1,33 @@
 from pyrogram import Client, filters
 from pyrogram.types import Message
 
-bot_token = "7631661650:AAFyLxGS_2tTirwd8A1Jxn3QEi_FERqnREg"  # Əvəz edin və ya mühit dəyişənindən çəkin
+# Bot üçün konfiqurasiya
+bot_token = "7631661650:AAFyLxGS_2tTirwd8A1Jxn3QEi_FERqnREg"
 
+# Botu yarat
 bot = Client("my_bot", bot_token=bot_token)
 
+# İstifadəçi məlumatlarını saxlayacaq bir lüğət
 user_sessions = {}
 
-@bot.on_message(filters.command("start"))
+@bot.on_message(filters.command(["start"]))
 def start(client, message: Message):
     message.reply("Salam! Mənə API ID göndərin:")
 
-@bot.on_message(filters.text & ~filters.command())
+@bot.on_message(filters.text & ~filters.command(["start"]))
 def handle_message(client, message: Message):
     user_id = message.from_user.id
     if user_id not in user_sessions:
+        # İlk dəfə məlumat göndərir, API ID-ni saxla
         user_sessions[user_id] = {"step": "api_id", "api_id": message.text}
         message.reply("API ID saxlanıldı! İndi API hash kodunu göndərin:")
     elif user_sessions[user_id]["step"] == "api_id":
+        # API hash-ni saxla
         user_sessions[user_id]["api_hash"] = message.text
         user_sessions[user_id]["step"] = "api_hash"
         message.reply("API hash saxlanıldı! İndi telefon nömrənizi göndərin:")
     elif user_sessions[user_id]["step"] == "api_hash":
+        # Telefon nömrəsini saxla və doğrulama kodunu göndər
         user_sessions[user_id]["phone_number"] = message.text
         user_sessions[user_id]["step"] = "phone_number"
 
@@ -39,6 +45,7 @@ def handle_message(client, message: Message):
             except Exception as e:
                 message.reply(f"Doğrulama kodunu göndərmək mümkün olmadı: {e}")
     elif user_sessions[user_id]["step"] == "phone_number":
+        # Doğrulama kodunu təsdiq et
         verification_code = message.text
 
         user_client = Client(
@@ -59,6 +66,7 @@ def handle_message(client, message: Message):
             except Exception as e:
                 message.reply(f"Doğrulama kodu səhvdir və ya istifadə müddəti bitmişdir: {e}")
     elif user_sessions[user_id]["step"] == "verified":
+        # Qrupların ID-lərini al və istifadəçiləri köçür
         args = message.text.split()
         if len(args) != 2:
             message.reply("Zəhmət olmasa, qrupların ID-lərini düzgün formatda göndərin:\nFormat: <source_chat_id> <target_chat_id>")
