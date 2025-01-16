@@ -1,5 +1,6 @@
 from pyrogram import Client, filters
 from pyrogram.types import Message
+import time
 
 # Bot konfiqurasiyası
 bot_token = "7631661650:AAFyLxGS_2tTirwd8A1Jxn3QEi_FERqnREg"
@@ -9,6 +10,8 @@ API_HASH = "35a400855835510c0a926f1e965aa12d"
 # Botu yarat
 bot = Client("my_bot", api_id=API_ID, api_hash=API_HASH, bot_token=bot_token)
 
+
+time.sleep(3)
 # İstifadəçi məlumatlarını saxlamaq üçün bir lüğət
 user_sessions = {}
 
